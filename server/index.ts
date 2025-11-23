@@ -3,6 +3,8 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { SchwabAuth } from './auth';
 import schwabRoutes from './routes/schwab';
+import tradingRoutes from './routes/trading';
+import { dataCollector } from './services/data-collector';
 
 const app = new Hono();
 const auth = new SchwabAuth();
@@ -143,6 +145,9 @@ app.post('/api/auth/logout', (c) => {
 // Mount Schwab API routes
 app.route('/api/schwab', schwabRoutes);
 
+// Mount Trading routes
+app.route('/api/trading', tradingRoutes);
+
 /**
  * 404 handler
  */
@@ -172,14 +177,29 @@ console.log('Environment:');
 console.log(`  PORT: ${PORT}`);
 console.log(`  FRONTEND_URL: ${FRONTEND_URL}`);
 console.log(`  NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
+console.log(`  Tracked Symbols: ${process.env.TRACKED_SYMBOLS || 'SPY,QQQ,SPX'}`);
+console.log(`  Naked Threshold: ${process.env.NAKED_POSITION_THRESHOLD || '1.5'}`);
 console.log('\nEndpoints:');
 console.log(`  Health: http://localhost:${PORT}/health`);
-console.log(`  Auth Login: http://localhost:${PORT}/api/auth/login`);
-console.log(`  Auth Status: http://localhost:${PORT}/api/auth/status`);
+console.log('\nAuthentication:');
+console.log(`  Login: http://localhost:${PORT}/api/auth/login`);
+console.log(`  Status: http://localhost:${PORT}/api/auth/status`);
+console.log('\nMarket Data:');
 console.log(`  Options Chain: http://localhost:${PORT}/api/schwab/chain/:symbol`);
 console.log(`  Quote: http://localhost:${PORT}/api/schwab/quote/:symbol`);
 console.log(`  Price History: http://localhost:${PORT}/api/schwab/pricehistory/:symbol`);
+console.log('\nTrading Analysis:');
+console.log(`  Dashboard: http://localhost:${PORT}/api/trading/dashboard`);
+console.log(`  Naked Positions: http://localhost:${PORT}/api/trading/naked-positions`);
+console.log(`  Credit Spreads: http://localhost:${PORT}/api/trading/credit-spreads`);
+console.log(`  Trade Signals: http://localhost:${PORT}/api/trading/signals`);
+console.log(`  P&L: http://localhost:${PORT}/api/trading/pnl`);
+console.log(`  Start Collection: http://localhost:${PORT}/api/trading/start`);
 console.log('\n');
+
+// Note: Data collection will auto-start when you call /api/trading/start
+console.log('💡 To start data collection, visit: http://localhost:${PORT}/api/trading/start');
+console.log('   Or use the frontend dashboard to enable monitoring\n');
 
 export default {
   port: PORT,
